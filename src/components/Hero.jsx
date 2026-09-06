@@ -127,6 +127,8 @@ export default function Hero() {
             <img
               src="/hero-visual.jpg"
               alt="VoxGuard AI Voice Verification Visual"
+              fetchPriority="high"
+              decoding="async"
               style={{
                 width: '100%',
                 height: 'auto',

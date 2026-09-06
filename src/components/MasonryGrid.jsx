@@ -1,187 +1,70 @@
 import React from 'react';
-import { PhoneCall, ShieldAlert, Cpu, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowUpRight, Building2, Landmark, PhoneCall } from 'lucide-react';
 
-const THREAT_SCENARIOS = [
+const CASES = [
   {
-    id: 'clone-speed',
-    icon: Cpu,
-    tag: '3 SECONDS',
-    tagColor: '#7c6daa',
-    title: 'Voicemail Cloned in 3s',
-    takeaway: 'Scammers rip audio from social media or voicemail to clone cadence and accent instantly.',
-    graphic: (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '40px', padding: '0 8px' }}>
-        {[20, 36, 15, 40, 24, 38, 12, 30, 26, 18, 35, 22].map((h, i) => (
-          <span
-            key={i}
-            style={{
-              flex: 1,
-              height: `${h}px`,
-              background: i > 6 ? '#F43F5E' : '#7c6daa',
-              borderRadius: '2px',
-              opacity: 0.85,
-            }}
-          />
-        ))}
-      </div>
-    ),
-    visualBadge: 'Human audio (left) vs AI generated clone (right)'
-  },
-  {
-    id: 'emergency-scam',
+    id: 'uk-direct-debit',
     icon: PhoneCall,
-    tag: 'FAMILY EMERGENCY',
-    tagColor: '#EF4444',
-    title: 'Panicked Relative Scam',
-    takeaway: 'Spoofs a family member pleading for immediate money. Protect with an offline secret word.',
-    graphic: (
-      <div
-        style={{
-          background: 'rgba(254, 242, 242, 0.9)',
-          borderRadius: '10px',
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }} />
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#991B1B' }}>Incoming: "Grandson"</span>
-        </div>
-        <span style={{ fontSize: '0.72rem', color: '#EF4444', fontWeight: 600 }}>Fake Voice</span>
-      </div>
-    ),
-    visualBadge: 'Emotional distress manufactured to bypass skepticism'
+    tag: 'UK • FEB 2026',
+    title: 'Cloned voices used to authorise payments',
+    summary: 'National Trading Standards reported AI-generated voice clones being used to simulate consent for unauthorised direct debits after scam calls collected personal data.',
+    source: 'National Trading Standards',
+    url: 'https://www.nationaltradingstandards.uk/news/phone-scams-take-sinister-twist-as-victims-voices-cloned/',
+    color: '#7c6daa',
   },
   {
-    id: 'wire-fraud',
-    icon: ShieldAlert,
-    tag: 'WIRE TRANSFER',
-    tagColor: '#D4AF37',
-    title: 'Executive Wire Impersonation',
-    takeaway: 'Simulates a CFO or CEO voice demanding urgent funds release before weekend cutoff.',
-    graphic: (
-      <div
-        style={{
-          background: 'rgba(255, 251, 235, 0.9)',
-          borderRadius: '10px',
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D4AF37' }} />
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400E' }}>Urgent Wire Authorization</span>
-        </div>
-        <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 600 }}>High Risk</span>
-      </div>
-    ),
-    visualBadge: 'Voice authorization falsified via deepfake speech'
-  }
+    id: 'italy-minister',
+    icon: Landmark,
+    tag: 'ITALY • FEB 2025',
+    title: 'A minister’s voice impersonated in calls',
+    summary: 'Business leaders were targeted by calls mimicking Italy’s defence minister and requesting money; reporting documented a victim transferring €1 million.',
+    source: 'The Guardian',
+    url: 'https://www.theguardian.com/world/2025/feb/10/ai-phone-scam-targets-italian-business-leaders-including-giorgio-armani',
+    color: '#e66a73',
+  },
+  {
+    id: 'india-family',
+    icon: Building2,
+    tag: 'INDIA • MAY 2025',
+    title: 'A family emergency call made with AI',
+    summary: 'A reported family-emergency scam used a cloned relative’s voice and a fake police story to pressure victims into sending money.',
+    source: 'The Indian Express',
+    url: 'https://indianexpress.com/article/technology/tech-news-technology/the-safe-side-ai-voice-cloning-scams-10023971/',
+    color: '#c2921f',
+  },
 ];
 
 export default function MasonryGrid() {
   return (
-    <section
-      id="threat-intel"
-      style={{
-        padding: '70px 0',
-        position: 'relative',
-      }}
-    >
+    <section id="threat-intel" className="threat-section">
       <div className="container">
-        {/* Minimal Header */}
-        <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 40px' }}>
-          <div className="luxury-badge" style={{ marginBottom: '12px' }}>
-            <AlertCircle size={14} />
-            <span>THREAT INTELLIGENCE</span>
-          </div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)', marginBottom: '10px' }}>
-            How Voice Scams <span className="gradient-text">Happen</span>
-          </h2>
-          <p style={{ fontSize: '0.98rem', color: 'var(--text-secondary)' }}>
-            3 common tactics used by voice cloning scammers today.
-          </p>
+        <div className="section-heading threat-heading">
+          <span className="eyebrow"><AlertCircle size={14} /> REAL-WORLD REPORTS</span>
+          <h2>AI voice scams are already <span className="gradient-text">happening</span></h2>
+          <p>Recent reporting and consumer-protection evidence—not hypothetical scenarios.</p>
         </div>
 
-        {/* Light-Reading Illustrated Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '20px',
-          }}
-        >
-          {THREAT_SCENARIOS.map((card) => {
-            const Icon = card.icon;
+        <div className="case-grid">
+          {CASES.map((item) => {
+            const Icon = item.icon;
             return (
-              <div
-                key={card.id}
-                className="glass-card"
-                style={{
-                  padding: '24px',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--border-subtle)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div>
-                  {/* Top tag */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '14px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.05em',
-                        color: card.tagColor,
-                        background: 'rgba(155, 142, 196, 0.12)',
-                        padding: '3px 9px',
-                        borderRadius: 'var(--radius-full)',
-                      }}
-                    >
-                      {card.tag}
-                    </span>
-                    <Icon size={18} color={card.tagColor} />
-                  </div>
-
-                  {/* Title */}
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px', color: 'var(--text-main)' }}>
-                    {card.title}
-                  </h3>
-
-                  {/* 1-Line Minimal Takeaway */}
-                  <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '18px' }}>
-                    {card.takeaway}
-                  </p>
+              <article key={item.id} className="case-card">
+                <div className="case-card-top">
+                  <span className="case-tag" style={{ color: item.color }}>{item.tag}</span>
+                  <span className="case-icon" style={{ color: item.color }}><Icon size={19} /></span>
                 </div>
-
-                {/* Graphic Visual Box */}
-                <div>
-                  <div style={{ marginBottom: '8px' }}>
-                    {card.graphic}
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                    {card.visualBadge}
-                  </div>
-                </div>
-              </div>
+                <h3>{item.title}</h3>
+                <p>{item.summary}</p>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="case-source">
+                  <span>Read the report · {item.source}</span>
+                  <ArrowUpRight size={17} />
+                </a>
+              </article>
             );
           })}
         </div>
+
+        <p className="source-note">Sources open in a new tab. Reported cases illustrate a growing risk; they do not establish that every suspicious call is AI-generated.</p>
       </div>
     </section>
   );
