@@ -239,7 +239,7 @@ export default function AudioDetector() {
     }
 
     setAnalyzing(true);
-    setProgressStatus("Connecting to mistralFace/voxGaurd API...");
+    setProgressStatus("Analyzing your recording...");
     setErrorMsg(null);
 
     try {
@@ -264,7 +264,7 @@ export default function AudioDetector() {
       }
     } catch (err) {
       console.error("API call failure:", err);
-      setErrorMsg(`API Error from mistralFace/voxGaurd: ${err.message || String(err)}`);
+      setErrorMsg(`Analysis failed: ${err.message || String(err)}`);
     } finally {
       setAnalyzing(false);
       setProgressStatus('');
@@ -293,6 +293,7 @@ export default function AudioDetector() {
   return (
     <section
       id="detector"
+      className="detector-section"
       style={{
         position: 'relative',
         padding: '50px 0 80px',
@@ -309,7 +310,7 @@ export default function AudioDetector() {
 
         {/* Main Detector Card */}
         <div
-          className="glass-card"
+          className="glass-card detector-card"
           style={{
             maxWidth: '820px',
             margin: '0 auto',
@@ -321,6 +322,7 @@ export default function AudioDetector() {
         >
           {/* Mode Switcher Tabs */}
           <div
+            className="detector-tabs"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -384,6 +386,7 @@ export default function AudioDetector() {
           {/* TAB 1: FILE UPLOAD ZONE */}
           {activeTab === 'upload' && !audioFile && (
             <div
+              className="detector-upload-panel"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => document.getElementById('audio-upload-input').click()}
@@ -436,6 +439,7 @@ export default function AudioDetector() {
           {/* TAB 2: LIVE MICROPHONE RECORDER */}
           {activeTab === 'mic' && !audioFile && (
             <div
+              className="detector-recorder-panel"
               style={{
                 border: '1px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-lg)',
@@ -539,6 +543,7 @@ export default function AudioDetector() {
           {/* AUDIO LOADED & SUBMIT */}
           {audioFile && (
             <div
+              className="detector-file-panel"
               style={{
                 background: 'rgba(255, 255, 255, 0.9)',
                 border: '1px solid var(--border-subtle)',
@@ -626,12 +631,12 @@ export default function AudioDetector() {
                   {analyzing ? (
                     <>
                       <RefreshCw size={18} style={{ animation: 'spinSlow 2s linear infinite' }} />
-                      <span>{progressStatus || 'Querying mistralFace/voxGaurd...'}</span>
+                      <span>{progressStatus || 'Analyzing your recording...'}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles size={18} />
-                      <span>Evaluate with mistralFace/voxGaurd API</span>
+                      <span>Analyze Voice</span>
                       <ArrowRight size={16} />
                     </>
                   )}

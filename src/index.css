@@ -254,3 +254,170 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* Compact, touch-friendly mobile layout */
+@media (max-width: 640px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .navbar-inner {
+    height: 56px !important;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .navbar-brand {
+    min-width: 0;
+  }
+
+  .navbar-wordmark {
+    font-size: 1.18rem !important;
+  }
+
+  .navbar-tagline {
+    display: none;
+  }
+
+  .navbar-github {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    padding: 0 !important;
+  }
+
+  .navbar-github span {
+    display: none;
+  }
+
+  .hero-section {
+    padding: 78px 0 28px !important;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 10vw, 2.45rem) !important;
+    line-height: 1.08 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .hero-description {
+    font-size: 0.96rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 18px !important;
+  }
+
+  .hero-trust {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px !important;
+  }
+
+  .hero-trust > div {
+    gap: 6px !important;
+  }
+
+  .hero-trust span {
+    font-size: 0.75rem !important;
+  }
+
+  .hero-visual {
+    border-radius: 18px !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  main > section:not(.hero-section) {
+    padding: 40px 0 44px !important;
+  }
+
+  main > section h2 {
+    font-size: 1.65rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .detector-section {
+    padding-top: 34px !important;
+  }
+
+  .detector-card {
+    padding: 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .detector-tabs {
+    gap: 4px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .detector-tabs > button {
+    gap: 6px !important;
+    padding: 8px 9px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .detector-upload-panel,
+  .detector-recorder-panel {
+    padding: 28px 16px !important;
+    border-radius: 18px !important;
+  }
+
+  .detector-file-panel {
+    padding: 16px !important;
+    margin-bottom: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .detector-file-panel audio {
+    margin-bottom: 0;
+  }
+
+  .detector-section .glass-card:hover {
+    transform: none;
+  }
+
+  .luxury-badge {
+    padding: 5px 11px;
+    font-size: 0.68rem !important;
+  }
+
+  main .glass-card {
+    border-radius: 18px !important;
+  }
+
+  .mobile-sticky-cta {
+    right: 14px !important;
+    bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobile-sticky-cta button {
+    width: 52px;
+    height: 52px;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 50% !important;
+  }
+
+  .mobile-sticky-cta button > span:last-child {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

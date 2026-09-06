@@ -26,6 +26,7 @@ export default function StickyCTA() {
 
   return (
     <div
+      className="mobile-sticky-cta"
       style={{
         position: 'fixed',
         bottom: '28px',

@@ -5,6 +5,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
+      className="hero-section"
       style={{
         position: 'relative',
         paddingTop: '110px',
@@ -26,6 +27,7 @@ export default function Hero() {
 
       <div className="container" style={{ position: 'relative', zIndex: 10 }}>
         <div
+          className="hero-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -34,7 +36,7 @@ export default function Hero() {
           }}
         >
           {/* Left Column: Minimal, Direct Copy */}
-          <div>
+          <div className="hero-copy">
             <div
               className="luxury-badge"
               style={{
@@ -47,6 +49,7 @@ export default function Hero() {
             </div>
 
             <h1
+              className="hero-title"
               style={{
                 fontSize: 'clamp(2.4rem, 4.4vw, 3.6rem)',
                 lineHeight: 1.15,
@@ -59,6 +62,7 @@ export default function Hero() {
             </h1>
 
             <p
+              className="hero-description"
               style={{
                 fontSize: '1.1rem',
                 color: 'var(--text-secondary)',
@@ -72,6 +76,7 @@ export default function Hero() {
 
             {/* Light, Skimmable Trust Badges */}
             <div
+              className="hero-trust"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -109,6 +114,7 @@ export default function Hero() {
 
           {/* Right Column: Relevant Visual Graphic */}
           <div
+            className="hero-visual"
             style={{
               position: 'relative',
               borderRadius: 'var(--radius-xl)',

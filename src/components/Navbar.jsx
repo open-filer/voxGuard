@@ -29,7 +29,7 @@ export default function Navbar() {
       }}
     >
       <div
-        className="container"
+        className="container navbar-inner"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -40,6 +40,7 @@ export default function Navbar() {
         {/* Brand Name — Clean, Elegant Luxury Typography (No bulky logo) */}
         <a
           href="#"
+          className="navbar-brand"
           style={{
             display: 'flex',
             alignItems: 'baseline',
@@ -48,6 +49,7 @@ export default function Navbar() {
           }}
         >
           <span
+            className="navbar-wordmark"
             style={{
               fontFamily: 'var(--font-display)',
               fontSize: '1.45rem',
@@ -59,6 +61,7 @@ export default function Navbar() {
             Vox<span style={{ color: 'var(--primary-soft-purple)' }}>Guard</span>
           </span>
           <span
+            className="navbar-tagline"
             style={{
               fontSize: '0.74rem',
               color: 'var(--text-muted)',
@@ -75,6 +78,7 @@ export default function Navbar() {
           href="https://github.com/open-filer/voxGuard"
           target="_blank"
           rel="noopener noreferrer"
+          className="navbar-github"
           style={{
             display: 'flex',
             alignItems: 'center',
