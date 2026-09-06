@@ -8,6 +8,44 @@ import confetti from 'canvas-confetti';
 import { predictAudio } from '../services/gradioClient';
 import { PRESET_SAMPLES, fetchSampleAudio } from '../services/sampleAudios';
 
+function audioBufferToWav(audioBuffer) {
+  const channelCount = 1;
+  const samples = audioBuffer.getChannelData(0);
+  const bytesPerSample = 2;
+  const dataSize = samples.length * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+
+  const writeText = (offset, value) => {
+    for (let index = 0; index < value.length; index += 1) {
+      view.setUint8(offset + index, value.charCodeAt(index));
+    }
+  };
+
+  writeText(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeText(8, 'WAVE');
+  writeText(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, channelCount, true);
+  view.setUint32(24, audioBuffer.sampleRate, true);
+  view.setUint32(28, audioBuffer.sampleRate * channelCount * bytesPerSample, true);
+  view.setUint16(32, channelCount * bytesPerSample, true);
+  view.setUint16(34, 16, true);
+  writeText(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  let offset = 44;
+  for (let index = 0; index < samples.length; index += 1) {
+    const sample = Math.max(-1, Math.min(1, samples[index]));
+    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+    offset += bytesPerSample;
+  }
+
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
 export default function AudioDetector() {
   const [activeTab, setActiveTab] = useState('upload');
   const [audioFile, setAudioFile] = useState(null);
@@ -46,6 +84,10 @@ export default function AudioDetector() {
     if (!file) return;
     setErrorMsg(null);
     setApiResult(null);
+    if (file.size === 0) {
+      setErrorMsg('This audio file is empty. Please choose a recording with sound.');
+      return;
+    }
     setAudioFile(file);
     const url = URL.createObjectURL(file);
     setAudioUrl(url);
@@ -103,14 +145,31 @@ export default function AudioDetector() {
         }
       };
 
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        audioBlob.name = `microphone_recording_${Date.now()}.wav`;
-        setAudioFile(audioBlob);
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        stream.getTracks().forEach((track) => track.stop());
-        if (audioCtx.state !== 'closed') audioCtx.close();
+      mediaRecorder.onstop = async () => {
+        try {
+          const recordedBlob = new Blob(audioChunksRef.current, {
+            type: mediaRecorder.mimeType || 'audio/webm',
+          });
+
+          if (recordedBlob.size === 0) {
+            throw new Error('No audio was captured.');
+          }
+
+          // MediaRecorder commonly returns WebM/Opus on mobile. Decode it in the
+          // browser and create a real WAV file before sending it to soundfile.
+          const decodedAudio = await audioCtx.decodeAudioData(await recordedBlob.arrayBuffer());
+          const audioBlob = audioBufferToWav(decodedAudio);
+          audioBlob.name = `microphone_recording_${Date.now()}.wav`;
+          setAudioFile(audioBlob);
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+        } catch (err) {
+          console.error('Microphone recording conversion error:', err);
+          setErrorMsg('The recording could not be converted to WAV. Please record again or upload a WAV/MP3 file.');
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+          if (audioCtx.state !== 'closed') audioCtx.close();
+        }
       };
 
       mediaRecorder.start();
@@ -184,12 +243,17 @@ export default function AudioDetector() {
     setErrorMsg(null);
 
     try {
-      // Direct call to Gradio API
       const rawData = await predictAudio(audioFile);
+      const item = Array.isArray(rawData) ? rawData[0] : rawData;
+      if (item?.error) {
+        throw new Error(item.error);
+      }
+      if (!item?.prediction || !item?.probabilities) {
+        throw new Error('The voice-detection service returned an invalid response.');
+      }
+
       setApiResult(rawData);
 
-      // Check if real
-      const item = Array.isArray(rawData) ? rawData[0] : rawData;
       if (item && item.prediction && item.prediction.toLowerCase() === 'real') {
         confetti({
           particleCount: 50,
