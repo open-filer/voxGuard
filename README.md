@@ -9,7 +9,11 @@
 
 ## What it does
 
-Upload a voice recording or capture one with your microphone. VoxGuard securely sends the original audio to a server-side proxy, which requests a prediction from the Hugging Face voice-detection model. The interface displays the model's live verdict, confidence, probabilities, and processing details.
+Upload a voice recording or capture one with your microphone. VoxGuard securely sends the original audio to a Cloudflare Pages Function, which requests a prediction from the Hugging Face voice-detection model. The interface displays the model's live verdict, confidence, probabilities, and processing details.
+
+## Live app
+
+Use VoxGuard at **[voxguard.pages.dev](https://voxguard.pages.dev/)**.
 
 > Results are model predictions, not guarantees. Always use human review for high-stakes decisions.
 
@@ -28,7 +32,7 @@ Upload a voice recording or capture one with your microphone. VoxGuard securely 
 Browser (React + Vite)
         │ original audio bytes + MIME type + filename
         ▼
-Node.js API proxy (/api/predict)
+Cloudflare Pages Function (/api/predict)
         │ authenticated inference request
         ▼
 Hugging Face Space (mistralFace/voxGaurd)
@@ -43,58 +47,23 @@ VoxGuard result screen
 | --- | --- |
 | Frontend | React 18, Vite 6, custom CSS |
 | UI details | Lucide React, Canvas Confetti |
-| Backend | Node.js native HTTP server |
+| Serverless backend | Cloudflare Pages Functions |
 | Inference client | `@gradio/client` |
 | Model service | Hugging Face Space / Gradio API |
 | Audio ML research | Python, PyTorch, TorchAudio, Wav2Vec2, AASIST, LFCC |
 | Evaluation | Scikit-learn, SciPy, NumPy, Pandas, Matplotlib, Seaborn |
 
-## Run locally
+## Deploying the inference function
 
-### Prerequisites
+The frontend and `/api/predict` function deploy automatically to Cloudflare Pages from the `main` branch. In the Cloudflare Pages project, add an encrypted production secret named `HF_TOKEN` containing a Hugging Face access token that can call `mistralFace/voxGaurd`.
 
-- Node.js 20 or later
-- A Hugging Face access token that can use the configured Space
-
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure your token
-
-Create a `.env` file in the project root:
-
-```env
-HF_TOKEN=your_hugging_face_token
-```
-
-Never commit this file or share your token.
-
-### 3. Start VoxGuard
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173). The frontend runs on port `5173`; its local API proxy forwards inference calls to the Node server on port `3001`.
-
-## Available commands
-
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the backend proxy and Vite frontend together |
-| `npm run server` | Start only the Node.js API proxy |
-| `npm run client` | Start only the Vite frontend |
-| `npm run build` | Create a production frontend build |
-| `npm run preview` | Preview the production frontend build |
+Without that secret, the function deliberately returns a configuration error instead of exposing a credential to visitors.
 
 ## API
 
 ### `POST /api/predict`
 
-Send raw audio bytes with the `Content-Type` of the audio file and an `X-Audio-Filename` header. The endpoint returns the live Hugging Face model response.
+The deployed endpoint is [https://voxguard.pages.dev/api/predict](https://voxguard.pages.dev/api/predict). Send raw audio bytes with the `Content-Type` of the audio file and an `X-Audio-Filename` header. The endpoint returns the live Hugging Face model response.
 
 ```json
 {
