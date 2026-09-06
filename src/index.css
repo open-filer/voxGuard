@@ -1,0 +1,256 @@
+:root {
+  /* Core Color Palette: Elegant & Luxury Lavender & Soft Purple */
+  --primary-lavender: #9b8ec4;
+  --primary-lavender-light: #c2b8e3;
+  --primary-lavender-ultra-light: #ece8f9;
+  --primary-soft-purple: #7c6daa;
+  --primary-soft-purple-dark: #5e4f8d;
+  
+  --bg-main: #F5F3FF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FAF9FF;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass-card: rgba(255, 255, 255, 0.82);
+  --bg-glass-dark: rgba(38, 28, 59, 0.85);
+
+  --text-main: #1C1628;
+  --text-secondary: #574B6D;
+  --text-muted: #84759D;
+  --text-light: #FBF9FE;
+
+  --border-subtle: rgba(155, 142, 196, 0.22);
+  --border-glow: rgba(155, 142, 196, 0.5);
+  --border-dark: rgba(43, 32, 66, 0.12);
+
+  --accent-gold: #D4AF37;
+  --accent-gold-soft: #F3E5AB;
+  --status-real: #10B981;
+  --status-real-bg: #ECFDF5;
+  --status-fake: #F43F5E;
+  --status-fake-bg: #FFF1F2;
+  
+  --shadow-sm: 0 2px 8px rgba(124, 109, 170, 0.08);
+  --shadow-md: 0 10px 25px -5px rgba(124, 109, 170, 0.12), 0 8px 10px -6px rgba(124, 109, 170, 0.06);
+  --shadow-lg: 0 20px 40px -10px rgba(124, 109, 170, 0.18), 0 1px 3px rgba(124, 109, 170, 0.1);
+  --shadow-glow: 0 0 35px rgba(155, 142, 196, 0.35);
+
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+  
+  --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.2s ease;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(194, 184, 227, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(124, 109, 170, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(245, 243, 255, 0.8) 0%, transparent 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-lavender);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-soft-purple);
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+p {
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Containers */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Luxury Card & Glassmorphic Utilities */
+.glass-card {
+  background: var(--bg-glass-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.luxury-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(155, 142, 196, 0.15);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--primary-soft-purple-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-soft-purple-dark) 0%, var(--primary-soft-purple) 50%, var(--primary-lavender) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Luxury Primary Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--primary-soft-purple) 0%, var(--primary-lavender) 100%);
+  box-shadow: 0 8px 20px -4px rgba(124, 109, 170, 0.4);
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(124, 109, 170, 0.55);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--primary-soft-purple-dark);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-lavender-ultra-light);
+  border-color: var(--primary-lavender);
+  transform: translateY(-2px);
+}
+
+/* Ambient Floating Glow Animation */
+@keyframes ambientGlow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(30px, -20px) scale(1.1);
+    opacity: 0.65;
+  }
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambientGlow 8s ease-in-out infinite alternate;
+}
+
+/* Keyframes for Pulse & Wave */
+@keyframes wavePulse {
+  0%, 100% {
+    height: 8px;
+  }
+  50% {
+    height: 36px;
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
