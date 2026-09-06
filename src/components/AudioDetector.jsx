@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Upload, Mic, Square, Play, Pause, AlertTriangle, 
   CheckCircle2, RefreshCw, Sparkles, Volume2, 
-  FileAudio, Shield, Lock, Activity, ArrowRight, Zap, Code
+  FileAudio, Shield, Activity, ArrowRight, Zap, Code
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { predictAudio } from '../services/gradioClient';
@@ -305,9 +305,6 @@ export default function AudioDetector() {
           <h2 style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.5rem)', marginBottom: '8px' }}>
             Check If Voice Is <span className="gradient-text">Real or AI</span>
           </h2>
-          <p style={{ fontSize: '0.98rem', color: 'var(--text-secondary)' }}>
-            Direct inference via Hugging Face Space <code>mistralFace/voxGaurd</code>.
-          </p>
         </div>
 
         {/* Main Detector Card */}
@@ -917,21 +914,6 @@ export default function AudioDetector() {
             </div>
           )}
 
-          {/* Direct API Info Badge */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              marginTop: '20px',
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <Lock size={12} />
-            <span>Endpoint: <code>mistralFace/voxGaurd/predict</code></span>
-          </div>
         </div>
       </div>
     </section>
