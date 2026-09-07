@@ -354,11 +354,14 @@ button {
   }
 
   .detector-tabs {
+    width: 100%;
+    max-width: 340px;
     gap: 4px !important;
     margin-bottom: 18px !important;
   }
 
   .detector-tabs > button {
+    min-width: 0;
     gap: 6px !important;
     padding: 8px 9px !important;
     font-size: 0.8rem !important;
@@ -378,6 +381,45 @@ button {
 
   .detector-file-panel audio {
     margin-bottom: 0;
+  }
+
+  .detector-file-panel > div:first-child > div:first-child {
+    min-width: 0;
+  }
+
+  .detector-file-panel > div:first-child > div:first-child > div:last-child {
+    min-width: 0;
+  }
+
+  .detector-file-panel > div:first-child > div:first-child > div:last-child > div:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detector-samples {
+    margin-top: 16px !important;
+    padding-top: 14px !important;
+  }
+
+  .detector-samples-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .detector-sample-card {
+    min-width: 0;
+    padding: 10px 12px !important;
+  }
+
+  .detector-sample-card > div:first-child {
+    min-width: 0;
+  }
+
+  .detector-sample-card > div:first-child > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .detector-section .glass-card:hover {

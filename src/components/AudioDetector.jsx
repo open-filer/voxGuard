@@ -647,6 +647,7 @@ export default function AudioDetector() {
 
           {/* REAL AUDIO SAMPLES (NO SYNTHETIC WAVES) */}
           <div
+            className="detector-samples"
             style={{
               marginTop: '22px',
               paddingTop: '16px',
@@ -654,6 +655,7 @@ export default function AudioDetector() {
             }}
           >
             <div
+              className="detector-samples-grid"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -678,6 +680,7 @@ export default function AudioDetector() {
               {PRESET_SAMPLES.map((sample) => (
                 <div
                   key={sample.id}
+                  className="detector-sample-card"
                   onClick={() => !loadingSample && handleSelectSample(sample)}
                   style={{
                     padding: '10px 14px',

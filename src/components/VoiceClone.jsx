@@ -94,7 +94,6 @@ export default function VoiceClone() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
-      recorder.stream = stream;
       const context = new (window.AudioContext || window.webkitAudioContext)();
       recorderRef.current = recorder;
       recordingContextRef.current = context;
@@ -123,7 +122,11 @@ export default function VoiceClone() {
       setIsRecording(true);
       timerRef.current = setInterval(() => setRecordSeconds((seconds) => seconds + 1), 1000);
     } catch (err) {
-      setError('Microphone access was denied or is unavailable in this browser.');
+      console.error('Voice reference microphone error:', err);
+      const message = err?.name === 'NotAllowedError'
+        ? 'Microphone permission was denied. Enable it in your browser settings and try again.'
+        : 'Your browser could not start the microphone. Try recording with the main voice checker or upload an audio file.';
+      setError(message);
     }
   };
 
