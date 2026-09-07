@@ -22,10 +22,11 @@ export async function predictAudio(audioBlobOrFile) {
     },
   });
 
-  const bridgeData = await response.json();
+  const contentType = response.headers.get('Content-Type') || '';
+  const bridgeData = contentType.includes('application/json') ? await response.json() : null;
 
-  if (!response.ok || !bridgeData.success) {
-    throw new Error(bridgeData.error || "Failed to query the voice-detection service");
+  if (!response.ok || !bridgeData?.success) {
+    throw new Error(bridgeData?.error || `The voice-detection service returned ${response.status}.`);
   }
 
   return bridgeData.data;
@@ -43,9 +44,10 @@ export async function cloneOwnVoice(referenceAudio, text, referenceText = '') {
       'X-Clone-Consent': 'true',
     },
   });
-  const data = await response.json();
-  if (!response.ok || !data.success) {
-    throw new Error(data.error || 'Voice generation failed');
+  const contentType = response.headers.get('Content-Type') || '';
+  const data = contentType.includes('application/json') ? await response.json() : null;
+  if (!response.ok || !data?.success) {
+    throw new Error(data?.error || `The voice-generation service returned ${response.status}.`);
   }
   return data;
 }
