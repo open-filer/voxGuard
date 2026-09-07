@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AudioLines, CheckCircle2, Download, LoaderCircle, Mic, ShieldCheck, Square, Upload } from 'lucide-react';
-import { cloneOwnVoice } from '../services/gradioClient';
+import { cloneOwnVoice, predictAudio } from '../services/gradioClient';
 
 function audioBufferToWav(audioBuffer) {
   const samples = audioBuffer.getChannelData(0);
@@ -44,6 +44,8 @@ export default function VoiceClone() {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [error, setError] = useState('');
   const [output, setOutput] = useState(null);
+  const [checkingOutput, setCheckingOutput] = useState(false);
+  const [outputCheck, setOutputCheck] = useState(null);
   const recorderRef = useRef(null);
   const recordingChunksRef = useRef([]);
   const recordingContextRef = useRef(null);
@@ -63,6 +65,7 @@ export default function VoiceClone() {
   const handleFile = (file) => {
     setError('');
     setOutput(null);
+    setOutputCheck(null);
     if (!file || file.size === 0) {
       setError('Choose a non-empty WAV, MP3, M4A, OGG, or FLAC recording.');
       return;
@@ -75,6 +78,7 @@ export default function VoiceClone() {
     setGenerating(true);
     setError('');
     setOutput(null);
+    setOutputCheck(null);
     try {
       const result = await cloneOwnVoice(referenceAudio, text.trim(), hasReferenceText ? referenceText.trim() : '');
       const returnedAudio = result.audio?.url || result.audio;
@@ -84,6 +88,31 @@ export default function VoiceClone() {
       setError(err.message || 'Voice generation failed.');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const checkGeneratedAudio = async () => {
+    if (!output?.url) return;
+    setCheckingOutput(true);
+    setError('');
+    setOutputCheck(null);
+    try {
+      const response = await fetch(output.url);
+      if (!response.ok) throw new Error('The generated audio could not be prepared for checking. Download it and try it in the main checker.');
+      const audio = await response.blob();
+      const filename = `my-voice-clone-${Date.now()}.${audio.type.includes('mpeg') ? 'mp3' : 'wav'}`;
+      const result = await predictAudio(new File([audio], filename, { type: audio.type || 'audio/wav' }));
+      const item = Array.isArray(result) ? result[0] : result;
+      if (!item?.prediction) throw new Error('The voice-detection service returned an invalid result.');
+      const confidence = Number(item.confidence);
+      setOutputCheck({
+        prediction: item.prediction,
+        confidence: Number.isFinite(confidence) ? (confidence <= 1 ? confidence * 100 : confidence) : null,
+      });
+    } catch (err) {
+      setError(err.message || 'Generated-audio check failed.');
+    } finally {
+      setCheckingOutput(false);
     }
   };
 
@@ -193,6 +222,15 @@ export default function VoiceClone() {
               <div className="clone-output">
                 <div><CheckCircle2 size={18} /><span>{output.status}</span></div>
                 <audio controls src={output.url} />
+                <button type="button" className="btn-primary clone-check" onClick={checkGeneratedAudio} disabled={checkingOutput}>
+                  {checkingOutput ? <LoaderCircle size={16} className="spin-icon" /> : <ShieldCheck size={16} />}
+                  {checkingOutput ? 'Checking generated audio…' : 'Check if clone is real or fake'}
+                </button>
+                {outputCheck && (
+                  <p className={`clone-check-result ${outputCheck.prediction.toLowerCase() === 'fake' ? 'is-fake' : 'is-real'}`}>
+                    <strong>{outputCheck.prediction}</strong>{outputCheck.confidence !== null && ` · ${outputCheck.confidence.toFixed(1)}% confidence`}
+                  </p>
+                )}
                 <a className="btn-secondary clone-download" href={output.url} download="my-voice-clone.wav"><Download size={16} /> Download audio</a>
               </div>
             )}
