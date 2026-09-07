@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AudioDetector from './components/AudioDetector';
+import VoiceClone from './components/VoiceClone';
 import WhyVoxGuard from './components/WhyVoxGuard';
 import MasonryGrid from './components/MasonryGrid';
 import FAQ from './components/FAQ';
@@ -18,6 +19,7 @@ export default function App() {
       <main style={{ flex: 1 }}>
         <Hero />
         <AudioDetector />
+        <VoiceClone />
         <WhyVoxGuard />
         <MasonryGrid />
         <FAQ />

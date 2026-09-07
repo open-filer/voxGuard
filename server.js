@@ -12,6 +12,8 @@ if (!token && fs.existsSync('.env')) {
 
 const SPACE_ID = 'mistralFace/voxGaurd';
 let hfClient = null;
+const OMNIVOICE_SPACE_ID = 'k2-fsa/OmniVoice';
+let omniVoiceClient = null;
 
 function getSafeAudioFilename(headerValue) {
   try {
@@ -32,6 +34,15 @@ async function getClient() {
   return hfClient;
 }
 
+async function getOmniVoiceClient() {
+  if (!omniVoiceClient) {
+    console.log(`[Backend] Connecting to Hugging Face Space: ${OMNIVOICE_SPACE_ID}...`);
+    omniVoiceClient = await Client.connect(OMNIVOICE_SPACE_ID, { hf_token: token || undefined });
+    console.log(`[Backend] Connected to ${OMNIVOICE_SPACE_ID} successfully!`);
+  }
+  return omniVoiceClient;
+}
+
 // Pre-warm connection
 getClient().catch((err) => {
   console.warn('[Backend] Initial HF connection notice:', err.message);
@@ -41,7 +52,7 @@ const server = http.createServer(async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Audio-Filename');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Audio-Filename, X-Clone-Text, X-Reference-Text, X-Clone-Consent');
 
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
@@ -87,6 +98,62 @@ const server = http.createServer(async (req, res) => {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({ success: false, error: err.message || 'Model prediction failed' }));
+    }
+  }
+
+  if (req.url === '/api/clone' && req.method === 'POST') {
+    try {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const buffer = Buffer.concat(chunks);
+      const text = decodeURIComponent(String(req.headers['x-clone-text'] || '')).trim();
+      const referenceText = decodeURIComponent(String(req.headers['x-reference-text'] || '')).trim();
+      const consent = req.headers['x-clone-consent'] === 'true';
+
+      if (!consent) {
+        res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ success: false, error: 'Confirm that you own this voice or have permission to use it.' }));
+      }
+      if (!buffer.length || !text) {
+        res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ success: false, error: 'A reference recording and text to synthesize are required.' }));
+      }
+      if (text.length > 500) {
+        res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ success: false, error: 'Please keep the generated text under 500 characters.' }));
+      }
+
+      const contentType = req.headers['content-type'] || 'audio/wav';
+      const filename = getSafeAudioFilename(req.headers['x-audio-filename']);
+      const referenceAudio = new File([buffer], filename, { type: contentType });
+      const client = await getOmniVoiceClient();
+      const result = await client.predict('/_clone_fn', {
+        text,
+        lang: 'Auto',
+        ref_aud: handle_file(referenceAudio),
+        ref_text: referenceText,
+        instruct: '',
+        ns: 32,
+        gs: 2.0,
+        dn: true,
+        sp: 1.0,
+        du: 8,
+        pp: true,
+        po: true,
+      });
+
+      const [audio, status] = result.data;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ success: true, audio, status }));
+    } catch (err) {
+      console.error('[Backend] OmniVoice clone error:', err);
+      omniVoiceClient = null;
+      res.statusCode = 502;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ success: false, error: err.message || 'Voice generation failed' }));
     }
   }
 
