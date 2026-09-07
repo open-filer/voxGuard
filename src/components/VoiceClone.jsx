@@ -1,6 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { AudioLines, CheckCircle2, Download, LoaderCircle, ShieldCheck, Upload } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { AudioLines, CheckCircle2, Download, LoaderCircle, Mic, ShieldCheck, Square, Upload } from 'lucide-react';
 import { cloneOwnVoice } from '../services/gradioClient';
+
+function audioBufferToWav(audioBuffer) {
+  const samples = audioBuffer.getChannelData(0);
+  const bytesPerSample = 2;
+  const dataSize = samples.length * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeText = (offset, value) => {
+    for (let index = 0; index < value.length; index += 1) view.setUint8(offset + index, value.charCodeAt(index));
+  };
+
+  writeText(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeText(8, 'WAVE');
+  writeText(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, audioBuffer.sampleRate, true);
+  view.setUint32(28, audioBuffer.sampleRate * bytesPerSample, true);
+  view.setUint16(32, bytesPerSample, true);
+  view.setUint16(34, 16, true);
+  writeText(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  for (let index = 0, offset = 44; index < samples.length; index += 1, offset += bytesPerSample) {
+    const sample = Math.max(-1, Math.min(1, samples[index]));
+    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+  }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
 
 export default function VoiceClone() {
   const [referenceAudio, setReferenceAudio] = useState(null);
@@ -9,12 +40,25 @@ export default function VoiceClone() {
   const [referenceText, setReferenceText] = useState('');
   const [consent, setConsent] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
   const [error, setError] = useState('');
   const [output, setOutput] = useState(null);
+  const recorderRef = useRef(null);
+  const recordingChunksRef = useRef([]);
+  const recordingContextRef = useRef(null);
+  const timerRef = useRef(null);
 
   useEffect(() => () => {
     if (output?.url?.startsWith('blob:')) URL.revokeObjectURL(output.url);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, [output]);
+
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    recorderRef.current?.stream?.getTracks().forEach((track) => track.stop());
+    if (recordingContextRef.current?.state !== 'closed') recordingContextRef.current?.close();
+  }, []);
 
   const handleFile = (file) => {
     setError('');
@@ -43,6 +87,52 @@ export default function VoiceClone() {
     }
   };
 
+  const startRecording = async () => {
+    setError('');
+    setOutput(null);
+    recordingChunksRef.current = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recorder.stream = stream;
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      recorderRef.current = recorder;
+      recordingContextRef.current = context;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordingChunksRef.current.push(event.data);
+      };
+      recorder.onstop = async () => {
+        try {
+          const recordedAudio = new Blob(recordingChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+          if (!recordedAudio.size) throw new Error('No audio was captured.');
+          const decoded = await context.decodeAudioData(await recordedAudio.arrayBuffer());
+          const wav = audioBufferToWav(decoded);
+          wav.name = `my-voice-reference-${Date.now()}.wav`;
+          handleFile(wav);
+        } catch (err) {
+          setError('The recording could not be converted. Please try again or upload an audio file.');
+          console.error('Voice reference recording error:', err);
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+          if (context.state !== 'closed') context.close();
+        }
+      };
+      recorder.start();
+      setRecordSeconds(0);
+      setIsRecording(true);
+      timerRef.current = setInterval(() => setRecordSeconds((seconds) => seconds + 1), 1000);
+    } catch (err) {
+      setError('Microphone access was denied or is unavailable in this browser.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (recorderRef.current && isRecording) recorderRef.current.stop();
+    if (timerRef.current) clearInterval(timerRef.current);
+    setIsRecording(false);
+  };
+
   return (
     <section id="voice-clone" className="voice-clone-section">
       <div className="container">
@@ -61,6 +151,13 @@ export default function VoiceClone() {
               <span>{referenceAudio ? referenceAudio.name : 'Choose your voice recording'}</span>
               {referenceAudio && <small>{(referenceAudio.size / 1024).toFixed(1)} KB</small>}
             </label>
+            <div className="clone-record-row">
+              <span>or</span>
+              <button type="button" className="clone-record-button" onClick={isRecording ? stopRecording : startRecording}>
+                {isRecording ? <Square size={15} /> : <Mic size={16} />}
+                {isRecording ? `Stop recording (${recordSeconds}s)` : 'Record my voice'}
+              </button>
+            </div>
 
             <label className="clone-text-label" htmlFor="clone-text">Text to generate</label>
             <textarea id="clone-text" value={text} maxLength={500} onChange={(event) => setText(event.target.value)} placeholder="Write something for your voice to say." />

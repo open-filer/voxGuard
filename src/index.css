@@ -604,6 +604,10 @@ button {
 .clone-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .clone-upload span { overflow: hidden; flex: 1; font-size: 0.86rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .clone-upload small { color: var(--text-muted); font-size: 0.72rem; }
+.clone-record-row { display: flex; align-items: center; gap: 10px; margin: 10px 0 3px; color: var(--text-muted); font-size: 0.72rem; }
+.clone-record-row::before, .clone-record-row::after { height: 1px; flex: 1; background: var(--border-subtle); content: ''; }
+.clone-record-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-full); color: var(--primary-soft-purple-dark); background: rgba(255, 255, 255, 0.7); font: inherit; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+.clone-record-button:hover { border-color: var(--primary-lavender); background: var(--primary-lavender-ultra-light); }
 .clone-text-label { margin: 17px 0 7px; color: var(--text-secondary); font-size: 0.82rem; font-weight: 700; }
 .clone-form textarea { min-height: 94px; resize: vertical; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 12px; outline: none; color: var(--text-main); background: #fff; font: inherit; font-size: 0.88rem; line-height: 1.5; }
 .clone-form textarea:focus { border-color: var(--primary-lavender); box-shadow: 0 0 0 3px rgba(155, 142, 196, 0.12); }
