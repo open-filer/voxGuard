@@ -1,12 +1,12 @@
 /**
  * VoxGuard API Client
  *
- * This service communicates with the secure backend proxy. Credentials are held
- * only in the backend environment and are never sent to the browser.
+ * Requests are sent through the app backend proxy. The detection proxy uses
+ * the VoxGuard Lambda inference endpoint, while cloning uses OmniVoice.
  */
 
 /**
- * Sends audio data to the backend proxy for prediction.
+ * Sends audio data to the VoxGuard Lambda detection proxy for prediction.
  * @param {Blob|File} audioBlobOrFile - The audio data to analyze.
  * @returns {Promise<Object>} The prediction result from the model.
  */
@@ -23,13 +23,13 @@ export async function predictAudio(audioBlobOrFile) {
   });
 
   const contentType = response.headers.get('Content-Type') || '';
-  const bridgeData = contentType.includes('application/json') ? await response.json() : null;
+  const result = contentType.includes('application/json') ? await response.json() : null;
 
-  if (!response.ok || !bridgeData?.success) {
-    throw new Error(bridgeData?.error || `The voice-detection service returned ${response.status}.`);
+  if (!response.ok) {
+    throw new Error(result?.detail || result?.error || `The voice-detection service returned ${response.status}.`);
   }
 
-  return bridgeData.data;
+  return result;
 }
 
 export async function cloneOwnVoice(referenceAudio, text, referenceText = '') {

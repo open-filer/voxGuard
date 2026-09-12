@@ -10,8 +10,7 @@ if (!token && fs.existsSync('.env')) {
   if (match) token = match[1];
 }
 
-const SPACE_ID = 'mistralFace/voxGaurd';
-let hfClient = null;
+const DETECTION_API_URL = 'https://bv5ukkwe6acklxj476jhor5nty0ugxzz.lambda-url.ap-south-1.on.aws/predict';
 const OMNIVOICE_SPACE_ID = 'k2-fsa/OmniVoice';
 let omniVoiceClient = null;
 
@@ -25,15 +24,6 @@ function getSafeAudioFilename(headerValue) {
   }
 }
 
-async function getClient() {
-  if (!hfClient) {
-    console.log(`[Backend] Connecting to Hugging Face Space: ${SPACE_ID}...`);
-    hfClient = await Client.connect(SPACE_ID, { hf_token: token });
-    console.log(`[Backend] Connected to ${SPACE_ID} successfully!`);
-  }
-  return hfClient;
-}
-
 async function getOmniVoiceClient() {
   if (!omniVoiceClient) {
     console.log(`[Backend] Connecting to Hugging Face Space: ${OMNIVOICE_SPACE_ID}...`);
@@ -42,11 +32,6 @@ async function getOmniVoiceClient() {
   }
   return omniVoiceClient;
 }
-
-// Pre-warm connection
-getClient().catch((err) => {
-  console.warn('[Backend] Initial HF connection notice:', err.message);
-});
 
 const server = http.createServer(async (req, res) => {
   // Enable CORS
@@ -61,7 +46,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.url === '/api/health') {
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ status: 'ok', space: SPACE_ID, hasToken: !!token }));
+    return res.end(JSON.stringify({ status: 'ok', detectionBackend: DETECTION_API_URL, hasToken: !!token }));
   }
 
   if (req.url === '/api/predict' && req.method === 'POST') {
@@ -78,26 +63,25 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ success: false, error: 'No audio data received' }));
       }
 
-      console.log(`[Backend] Processing ${buffer.length} bytes of audio with Hugging Face model...`);
+      console.log(`[Backend] Processing ${buffer.length} bytes of audio with VoxGuard Lambda...`);
       const contentType = req.headers['content-type'] || 'audio/wav';
       const filename = getSafeAudioFilename(req.headers['x-audio-filename']);
       const audioFile = new File([buffer], filename, { type: contentType });
-
-      const client = await getClient();
-      const result = await client.predict('/predict', {
-        audio_path: handle_file(audioFile),
+      const form = new FormData();
+      form.append('file', audioFile, filename);
+      const response = await fetch(DETECTION_API_URL, {
+        method: 'POST',
+        body: form,
       });
-
-      console.log('[Backend] Real Hugging Face result received:', JSON.stringify(result.data));
-
-      res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({ success: true, data: result.data }));
+      const body = await response.arrayBuffer();
+      res.statusCode = response.status;
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json; charset=utf-8');
+      return res.end(Buffer.from(body));
     } catch (err) {
-      console.error('[Backend] Prediction error from Hugging Face Space:', err);
-      hfClient = null; // reset cache on error
-      res.statusCode = 500;
+      console.error('[Backend] Prediction error from VoxGuard Lambda:', err);
+      res.statusCode = 502;
       res.setHeader('Content-Type', 'application/json');
-      return res.end(JSON.stringify({ success: false, error: err.message || 'Model prediction failed' }));
+      return res.end(JSON.stringify({ error: err.message || 'Model prediction failed' }));
     }
   }
 
@@ -163,5 +147,5 @@ const server = http.createServer(async (req, res) => {
 
 const PORT = Number(process.env.PORT || 3001);
 server.listen(PORT, () => {
-  console.log(`[Backend] HF Proxy Server running at http://localhost:${PORT}`);
+  console.log(`[Backend] VoxGuard proxy server running at http://localhost:${PORT}`);
 });
