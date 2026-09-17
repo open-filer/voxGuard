@@ -2,15 +2,16 @@ import http from 'http';
 import fs from 'fs';
 import { Client, handle_file } from '@gradio/client';
 
-// Extract token from .env
-let token = process.env.HF_TOKEN || '';
-if (!token && fs.existsSync('.env')) {
-  const envContent = fs.readFileSync('.env', 'utf-8');
-  const match = envContent.match(/HF_TOKEN=(hf_\w+)/);
-  if (match) token = match[1];
+function getEnvironmentValue(name) {
+  if (process.env[name]) return process.env[name];
+  if (!fs.existsSync('.env')) return '';
+
+  const match = fs.readFileSync('.env', 'utf-8').match(new RegExp(`^${name}=(.*)$`, 'm'));
+  return match?.[1]?.trim() || '';
 }
 
-const DETECTION_API_URL = 'https://bv5ukkwe6acklxj476jhor5nty0ugxzz.lambda-url.ap-south-1.on.aws/predict';
+const token = getEnvironmentValue('HF_TOKEN');
+const DETECTION_API_URL = getEnvironmentValue('DETECTION_API_URL');
 const OMNIVOICE_SPACE_ID = 'k2-fsa/OmniVoice';
 let omniVoiceClient = null;
 
@@ -46,11 +47,16 @@ const server = http.createServer(async (req, res) => {
 
   if (req.url === '/api/health') {
     res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ status: 'ok', detectionBackend: DETECTION_API_URL, hasToken: !!token }));
+    return res.end(JSON.stringify({ status: 'ok', detectionBackendConfigured: !!DETECTION_API_URL, hasToken: !!token }));
   }
 
   if (req.url === '/api/predict' && req.method === 'POST') {
     try {
+      if (!DETECTION_API_URL) {
+        res.statusCode = 503;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({ error: 'The detection backend is not configured.' }));
+      }
       const chunks = [];
       for await (const chunk of req) {
         chunks.push(chunk);

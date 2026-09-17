@@ -55,7 +55,7 @@ VoxGuard result screen
 
 ## Deploying the inference function
 
-The frontend and `/api/predict` function deploy automatically to Cloudflare Pages from the `main` branch. In the Cloudflare Pages project, add an encrypted production secret named `HF_TOKEN` containing a Hugging Face access token that can call `mistralFace/voxGaurd`.
+The frontend and `/api/predict` function deploy automatically to Cloudflare Pages from the `main` branch. In the Cloudflare Pages project, add an encrypted production secret named `DETECTION_API_URL` containing the AWS detection endpoint. This keeps the endpoint out of the browser bundle and tracked source code. If you use voice cloning, also add `HF_TOKEN` containing a Hugging Face access token that can call `mistralFace/voxGaurd`.
 
 Without that secret, the function deliberately returns a configuration error instead of exposing a credential to visitors.
 

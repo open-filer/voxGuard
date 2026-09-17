@@ -1,5 +1,3 @@
-const DETECTION_API_URL = "https://bv5ukkwe6acklxj476jhor5nty0ugxzz.lambda-url.ap-south-1.on.aws/predict";
-
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -30,7 +28,7 @@ export async function onRequestOptions() {
   });
 }
 
-export async function onRequestPost({ request }) {
+export async function onRequestPost({ request, env }) {
   const audio = await request.arrayBuffer();
   if (!audio.byteLength) {
     return json({ success: false, error: "No audio data received" }, 400);
@@ -38,12 +36,17 @@ export async function onRequestPost({ request }) {
 
   const filename = getSafeFilename(request.headers.get("X-Audio-Filename"));
   const contentType = request.headers.get("Content-Type") || "audio/wav";
+  const detectionApiUrl = env.DETECTION_API_URL;
+
+  if (!detectionApiUrl) {
+    return json({ error: "The detection backend is not configured." }, 503);
+  }
 
   try {
     const audioFile = new File([audio], filename, { type: contentType });
     const form = new FormData();
     form.append("file", audioFile, filename);
-    const response = await fetch(DETECTION_API_URL, {
+    const response = await fetch(detectionApiUrl, {
       method: "POST",
       body: form,
     });
