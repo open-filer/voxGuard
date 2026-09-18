@@ -9,11 +9,12 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
-![Hugging%20Face](https://img.shields.io/badge/Hugging%20Face-Inference-FFD21E?logo=huggingface&logoColor=black)
+![AWS](https://img.shields.io/badge/AWS-Hosted%20Inference-232F3E?logo=amazon-aws&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages%20Functions-F38020?logo=cloudflare&logoColor=white)
 
 ## What it does
 
-Upload a voice recording or capture one with your microphone. VoxGuard securely sends the original audio to a Cloudflare Pages Function, which requests a prediction from the Hugging Face voice-detection model. The interface displays the model's live verdict, confidence, probabilities, and processing details.
+Upload a voice recording or capture one with your microphone. VoxGuard securely sends the original audio to a Cloudflare Pages Function, which requests a prediction from the AWS-hosted voice-detection API. The interface displays the model's live verdict, confidence, probabilities, and processing details.
 
 ## Live app
 
@@ -25,8 +26,8 @@ Use VoxGuard at **[voxguard.pages.dev](https://voxguard.pages.dev/)**.
 
 - Upload WAV, MP3, M4A, OGG, and other browser-supported audio formats
 - Record directly from the browser
-- Live Hugging Face inference — no hardcoded verdicts
-- Server-side token handling; the Hugging Face credential never reaches the browser
+- Live AWS-hosted API inference — no hardcoded verdicts
+- Secure server-side proxying; backend API endpoints and secrets never reach the browser
 - Displays real/fake probabilities, confidence, clip duration, inference windows, and latency
 - Responsive React interface with a clean, accessible visual design
 
@@ -37,9 +38,9 @@ Browser (React + Vite)
         │ original audio bytes + MIME type + filename
         ▼
 Cloudflare Pages Function (/api/predict)
-        │ authenticated inference request
+        │ multipart/form-data audio request
         ▼
-Hugging Face Space (mistralFace/voxGaurd)
+AWS-Hosted Detection API (AWS Lambda / API Gateway)
         │ prediction JSON
         ▼
 VoxGuard result screen
@@ -51,23 +52,22 @@ VoxGuard result screen
 | --- | --- |
 | Frontend | React 18, Vite 6, custom CSS |
 | UI details | Lucide React, Canvas Confetti |
-| Serverless backend | Cloudflare Pages Functions |
-| Inference client | `@gradio/client` |
-| Model service | Hugging Face Space / Gradio API |
+| Serverless proxy | Cloudflare Pages Functions |
+| Model inference | AWS-hosted Detection API (AWS Lambda / REST) |
 | Audio ML research | Python, PyTorch, TorchAudio, Wav2Vec2, AASIST, LFCC |
 | Evaluation | Scikit-learn, SciPy, NumPy, Pandas, Matplotlib, Seaborn |
 
 ## Deploying the inference function
 
-The frontend and `/api/predict` function deploy automatically to Cloudflare Pages from the `main` branch. In the Cloudflare Pages project, add an encrypted production secret named `DETECTION_API_URL` containing the AWS detection endpoint. This keeps the endpoint out of the browser bundle and tracked source code. If you use voice cloning, also add `HF_TOKEN` containing a Hugging Face access token that can call `mistralFace/voxGaurd`.
+The frontend and `/api/predict` function deploy automatically to Cloudflare Pages from the `main` branch. In the Cloudflare Pages project, add an encrypted production secret named `DETECTION_API_URL` containing the AWS detection endpoint URL. This keeps the backend endpoint and any authorization details out of the browser bundle and tracked source code.
 
-Without that secret, the function deliberately returns a configuration error instead of exposing a credential to visitors.
+Without that secret, the function deliberately returns a configuration error (`503 Service Unavailable`) instead of exposing backend credentials or details to visitors.
 
 ## API
 
 ### `POST /api/predict`
 
-The deployed endpoint is [https://voxguard.pages.dev/api/predict](https://voxguard.pages.dev/api/predict). Send raw audio bytes with the `Content-Type` of the audio file and an `X-Audio-Filename` header. The endpoint returns the live Hugging Face model response.
+The deployed endpoint is [https://voxguard.pages.dev/api/predict](https://voxguard.pages.dev/api/predict). Send raw audio bytes with the `Content-Type` of the audio file and an `X-Audio-Filename` header. The endpoint forwards the audio to the AWS-hosted detection API and returns the live model response.
 
 ```json
 {
@@ -107,4 +107,7 @@ Voice-authenticity detection models can make mistakes, especially across languag
 
 ## License
 
-Add a license before distributing or reusing this project publicly.
+This project is licensed under a **Custom Non-Commercial License** — see the [LICENSE](LICENSE) file for complete terms.
+
+- **Non-Commercial Use:** Free to use, copy, modify, and distribute for non-commercial, research, and personal evaluation purposes.
+- **Commercial Rights Reserved:** All commercial use, deployment in revenue-generating services, or commercial relicensing is reserved exclusively to [Kritagya Singh (@open-filer)](https://github.com/open-filer).
